@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Loader from "../Loader";
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
@@ -17,11 +18,13 @@ const SignIn = () => {
     password: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const { setIsLoggedIn, setRole } = useContext(UserContext);
+  const { setIsLoggedIn, setRole, setUserId } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -31,13 +34,15 @@ const SignIn = () => {
     console.log(formData);
 
     try {
+      setIsLoading(true);
       const response = await axios.post(`${BASE_URL}/auth/sign-in`, formData);
 
       if (response.status === 200) {
-        const { token, role, message } = response.data;
+        const { token, role, userId, message } = response.data;
 
         setIsLoggedIn(token);
         setRole(role);
+        setUserId(userId);
 
         if (role === "USER") {
           navigate("/");
@@ -59,6 +64,7 @@ const SignIn = () => {
         });
       }
     } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,8 +109,9 @@ const SignIn = () => {
               <button
                 type="submit"
                 className="bg-[#2d6ab4] text-white px-2.5 py-2 w-full lg:w-fit rounded-md "
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? <Loader size={25} color="#fff" /> : `Sign In`}
               </button>
             </div>
           </form>

@@ -1,102 +1,110 @@
-import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { CiMenuFries } from "react-icons/ci";
-import { IoMdClose } from "react-icons/io";
+import { useContext, useEffect, useRef } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { IoMenuSharp } from "react-icons/io5";
 import { UserContext } from "../context/UserContext";
 
-const Navbar = () => {
-  const [toggleMenu, setToggleMenu] = useState(false);
+const navLinks = [
+  { path: "/", display: "Home" },
+  { path: "/posts/create-post", display: "Create Post" },
+  { path: "/users/profile", display: "Profile" },
+];
 
-  const handleToggle = () => {
-    setToggleMenu(!toggleMenu);
-  };
+const Navbar = () => {
+  const menuRef = useRef(null);
+  const headerRef = useRef(null);
 
   const { isLoggedIn } = useContext(UserContext);
 
   const token = isLoggedIn;
 
-  useEffect(() => {
+  const toggleMenu = () => {
+    menuRef.current.classList.toggle("show-menu");
+  };
+
+  const handleStickyHeader = () => {
     const handleScroll = () => {
-      const navbar = document.getElementById("navbar");
-      if (navbar) {
-        if (window.scrollY > 80) {
-          navbar.classList.add("sticky-navbar");
-        } else {
-          navbar.classList.remove("sticky-navbar");
-        }
+      if (
+        document.body.scrollTop > 80 ||
+        document.documentElement.scrollTop > 80
+      ) {
+        headerRef.current.classList.add("sticky-navbar");
+      } else {
+        headerRef.current.classList.remove("sticky-navbar");
       }
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  };
+
+  useEffect(() => {
+    handleStickyHeader();
   }, []);
 
   return (
-    <nav
-      id="navbar"
-      className="h-[10vh] px-[10px] md:px-[30px] mx-auto flex w-full items-center justify-between bg-white"
+    <header
+      className="flex items-center px-4 md:px-[5rem] h-[10vh]"
+      ref={headerRef}
     >
-      <Link to={"/"}>Blogiee</Link>
+      <div className="container">
+        <div className="flex items-center justify-between">
+          <NavLink to={"/"}>
+            <h2 className="text-[22px] font-[900]">Blogiee</h2>
+          </NavLink>
 
-      {/* Desktop Links */}
-      <div className="hidden md:flex items-center gap-4">
-        <Link to={"/"}>Home</Link>
-        {token && <Link to={"/posts/create-post"}>Add post</Link>}
-        {token && <Link to={"/users/profile"}>Profile</Link>}
-        {token ? (
-          <Link
-            to={"/auth/logout"}
-            className="bg-[#333] p-3 text-white rounded"
-          >
-            Logout
-          </Link>
-        ) : (
-          <Link
-            to={"/auth/sign-in"}
-            className="bg-[#2d6ab4] p-3 text-white rounded"
-          >
-            Sign in
-          </Link>
-        )}
-      </div>
+          <div className="navigation" ref={menuRef} onClick={toggleMenu}>
+            <ul className="menu flex items-center gap-[2rem]">
+              {navLinks.map((link, index) => {
+                if (
+                  !token &&
+                  (link.path === "/posts/create-post" ||
+                    link.path === "/users/profile")
+                ) {
+                  return null; // Skip rendering this link
+                }
+                return (
+                  <li key={index}>
+                    <NavLink
+                      to={link.path}
+                      className={(navClass) =>
+                        navClass.isActive
+                          ? " text-[#2d6ab4] text-[16px] leading-7 font-[600]"
+                          : " text-black text-[16px] leading-7 font-[500] hover:text-[#2d6ab4]"
+                      }
+                    >
+                      {link.display}
+                    </NavLink>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-      {/* Toggle Button */}
-      <button onClick={handleToggle} className="md:hidden z-20">
-        {/* {toggleMenu ? ( */}
-        {/* <IoMdClose className="text-[22px]" /> */}
-        {/* ) : ( */}
-        <CiMenuFries className="text-[22px]" />
-        {/* )} */}
-      </button>
+          <div className="flex items-center gap-4">
+            {token ? (
+              <Link to={"/auth/logout"}>
+                <button className=" bg-[#2d6ab4] py-[5px] md:py-2 px-3 md:px-6 text-white text-[14px] md:text-[18px] font-[600] h-[44px] flex items-center justify-center rounded-[10px] md:rounded-[50px]">
+                  Logout
+                </button>
+              </Link>
+            ) : (
+              <Link to={"/auth/sign-in"}>
+                <button className=" bg-[#2d6ab4] py-[5px] md:py-2 px-3 md:px-6 text-white text-[14px] md:text-[18px] font-[600] h-[44px] flex items-center justify-center rounded-[10px] md:rounded-[50px]">
+                  Sign in
+                </button>
+              </Link>
+            )}
 
-      {/* Fullscreen Mobile Menu */}
-      {toggleMenu && (
-        <div className="fixed inset-0 bg-white/75 flex flex-col items-center justify-center z-50">
-          <button onClick={handleToggle} className="absolute top-5 right-5">
-            <IoMdClose className="text-[22px]" />
-          </button>
-          <Link to={"/"} onClick={handleToggle} className="p-4 text-lg">
-            Home
-          </Link>
-          {token && (
-            <Link
-              to={"/posts/create-post"}
-              onClick={handleToggle}
-              className="p-4 text-lg"
-            >
-              Add post
-            </Link>
-          )}
-          <Link
-            to={"/auth/logout"}
-            onClick={handleToggle}
-            className="p-4 text-lg"
-          >
-            Logout
-          </Link>
+            <span onClick={toggleMenu} className="md:hidden">
+              <IoMenuSharp className="h-6 w-6 cursor-pointer" />
+            </span>
+          </div>
         </div>
-      )}
-    </nav>
+      </div>
+    </header>
   );
 };
 

@@ -30,7 +30,8 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User registered successfully',
             'token' => $token,
-            'role' => $user->role
+            'role' => $user->role,
+            'userId' => $user->id
         ], 200);
     }
 
@@ -49,7 +50,8 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'User logged in successfully',
                 'role' => $user->role,
-                'token' => $token
+                'token' => $token,
+                'userId' => $user->id
             ], 200);
         } else {
             return response()->json([

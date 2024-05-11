@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../../context/UserContext";
 import toast from "react-hot-toast";
+import Loader from "../Loader";
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 
@@ -22,6 +23,8 @@ const Profile = ({ profileData }) => {
     });
   };
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const { isLoggedIn } = useContext(UserContext);
 
   const token = isLoggedIn;
@@ -31,6 +34,7 @@ const Profile = ({ profileData }) => {
     console.log(editableProfileData);
 
     try {
+      setIsLoading(true);
       const response = await axios.put(
         `${BASE_URL}/users/update-profile`,
         editableProfileData,
@@ -59,6 +63,8 @@ const Profile = ({ profileData }) => {
           password_confirmation: errors.password_confirmation || "",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,8 +145,9 @@ const Profile = ({ profileData }) => {
           <button
             type="submit"
             className="bg-[#2d6ab4] text-white px-2.5 py-2 w-full lg:w-fit rounded-md "
+            disabled={isLoading}
           >
-            Update Profile
+            {isLoading ? <Loader size={25} color="#fff" /> : `Update profile`}
           </button>
         </div>
       </form>
