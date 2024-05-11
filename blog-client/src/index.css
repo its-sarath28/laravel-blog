@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Poetsen+One&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .container {
+    @apply max-w-[1400px] px-5 mx-auto;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 border border-solid border-[#0066FF61] focus:outline-none  text-[16px] leading-7   cursor-pointer rounded-md;
+  }
+}
